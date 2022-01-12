@@ -11,7 +11,7 @@ import sys
 import getopt
 import glob
 
-submitDirectory = "/afs/cs.cmu.edu/academic/class/15418-s19/public/asst1-handin"
+submitDirectory = "/afs/cs.cmu.edu/academic/class/15418-s22/public/asst1-handin"
 
 def usage(name):
     print "Usage: %s -u USER [-h]" % name
