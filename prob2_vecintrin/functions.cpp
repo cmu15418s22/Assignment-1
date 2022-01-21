@@ -23,9 +23,9 @@ void absVector(float *values, float *output, int N) {
     __cmu418_vec_float zero = _cmu418_vset_float(0.f);
     __cmu418_mask maskAll, maskIsNegative, maskIsNotNegative;
 
-    //  Note: Take a careful look at this loop indexing.  This example
-    //  code is not guaranteed to work when (N % VECTOR_WIDTH) != 0.
-    //  Why is that the case?
+    // Note: Take a careful look at this loop indexing.  This example
+    // code is not guaranteed to work when (N % VECTOR_WIDTH) != 0.
+    // Why is that the case?
     for (int i = 0; i < N; i += VECTOR_WIDTH) {
 
         // All ones
@@ -41,15 +41,13 @@ void absVector(float *values, float *output, int N) {
         _cmu418_vlt_float(maskIsNegative, x, zero, maskAll); // if (x < 0) {
 
         // Execute instruction using mask ("if" clause)
-        _cmu418_vsub_float(result, zero, x,
-                           maskIsNegative); //   output[i] = -x;
+        _cmu418_vsub_float(result, zero, x, maskIsNegative); //   output[i] = -x;
 
         // Inverse maskIsNegative to generate "else" mask
         maskIsNotNegative = _cmu418_mask_not(maskIsNegative); // } else {
 
         // Execute instruction ("else" clause)
-        _cmu418_vload_float(result, values + i,
-                            maskIsNotNegative); //   output[i] = x; }
+        _cmu418_vload_float(result, values + i, maskIsNotNegative); //   output[i] = x; }
 
         // Write results back to memory
         _cmu418_vstore_float(output + i, result, maskAll);

@@ -56,8 +56,7 @@ using namespace ispc;
 void usage(const char *progname) {
     printf("Usage: %s [options]\n", progname);
     printf("Program Options:\n");
-    printf(
-        "  -t  --tasks             Run ISPC code implementation with tasks\n");
+    printf("  -t  --tasks             Run ISPC code implementation with tasks\n");
     printf("  -v  --view <INT>        Use specified view settings (0-6)\n");
     printf("  -f  --field x0:y0:x1:y1 Specify set boundaries\n");
     printf("  -o  outfile             Specify output file\n");

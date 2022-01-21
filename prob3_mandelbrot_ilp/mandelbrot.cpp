@@ -107,40 +107,24 @@ int mandel_ref(float c_re, float c_im, int count) {
 
 // Versions of the code with different levels of parallelism
 void mandel_par1(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(1)
+void mandel_par2(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(2)
+void mandel_par3(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(3)
+void mandel_par4(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(4)
+void mandel_par5(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(5)
+void mandel_par6(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(6)
+void mandel_par7(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(7)
+void mandel_par8(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(8)
 
-    void mandel_par2(float *c_re, float *c_im, int count,
-                     int *iters) MANDEL_BODY(2)
-
-        void mandel_par3(float *c_re, float *c_im, int count,
-                         int *iters) MANDEL_BODY(3)
-
-            void mandel_par4(float *c_re, float *c_im, int count, int *iters)
-                MANDEL_BODY(4)
-
-                    void mandel_par5(float *c_re, float *c_im, int count,
-                                     int *iters) MANDEL_BODY(5)
-
-                        void mandel_par6(float *c_re, float *c_im, int count,
-                                         int *iters) MANDEL_BODY(6)
-
-                            void mandel_par7(float *c_re, float *c_im,
-                                             int count, int *iters)
-                                MANDEL_BODY(7)
-
-                                    void mandel_par8(float *c_re, float *c_im,
-                                                     int count, int *iters)
-                                        MANDEL_BODY(8)
-
-    // Information about the different benchmarks
-    par_info par_funs[] = {{1, mandel_par1, "ILP parallelism x1"},
-                           {2, mandel_par2, "ILP parallelism x2"},
-                           {3, mandel_par3, "ILP parallelism x3"},
-                           {4, mandel_par4, "ILP parallelism x4"},
-                           {5, mandel_par5, "ILP parallelism x5"},
-                           {6, mandel_par6, "ILP parallelism x6"},
-                           {7, mandel_par7, "ILP parallelism x7"},
-                           {8, mandel_par8, "ILP parallelism x8"},
-                           {0, NULL, ""}};
+// Information about the different benchmarks
+par_info par_funs[] = {{1, mandel_par1, "ILP parallelism x1"},
+                       {2, mandel_par2, "ILP parallelism x2"},
+                       {3, mandel_par3, "ILP parallelism x3"},
+                       {4, mandel_par4, "ILP parallelism x4"},
+                       {5, mandel_par5, "ILP parallelism x5"},
+                       {6, mandel_par6, "ILP parallelism x6"},
+                       {7, mandel_par7, "ILP parallelism x7"},
+                       {8, mandel_par8, "ILP parallelism x8"},
+                       {0, NULL, ""}};
 
 //
 // MandelbrotSerial --
