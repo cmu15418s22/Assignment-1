@@ -140,12 +140,14 @@ void mandelbrotThread(int numThreads, float x0, float y0, float x1, float y1,
     // are created and the main app thread is used as a worker as
     // well.
 
-    for (int i = 1; i < numThreads; i++)
+    for (int i = 1; i < numThreads; i++) {
         pthread_create(&workers[i], NULL, workerThreadStart, &args[i]);
+    }
 
     workerThreadStart(&args[0]);
 
-    // wait for worker threads to complete
-    for (int i = 1; i < numThreads; i++)
+    // Wait for worker threads to complete
+    for (int i = 1; i < numThreads; i++) {
         pthread_join(workers[i], NULL);
+    }
 }

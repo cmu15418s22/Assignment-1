@@ -11,8 +11,7 @@ using namespace ispc;
 
 typedef enum { DATA_RANDOM, DATA_GOOD, DATA_BAD } data_t;
 
-extern void cuberootSerial(int N, float startGuess, float *values,
-                           float *output);
+extern void cuberootSerial(int N, float startGuess, float *values, float *output);
 
 extern void initRandom(float *values, int N);
 extern void initGood(float *values, int N);
@@ -34,7 +33,6 @@ static void verifyResult(int N, float *result, float *gold) {
 }
 
 int main(int argc, char *argv[]) {
-
     const int N = 64 * 1000 * 1000;
     const float initialGuess = 1.0f;
 
@@ -44,10 +42,13 @@ int main(int argc, char *argv[]) {
 
     data_t dmode = DATA_RANDOM;
 
-    // parse commandline options ////////////////////////////////////////////
+    // Parse commandline options
     int opt;
     static struct option long_options[] = {
-        {"data", 1, 0, 'd'}, {"help", 0, 0, '?'}, {0, 0, 0, 0}};
+        {"data", 1, 0, 'd'},
+        {"help", 0, 0, '?'},
+        {0, 0, 0, 0}
+    };
 
     while ((opt = getopt_long(argc, argv, "d:?", long_options, NULL)) != EOF) {
         switch (opt) {

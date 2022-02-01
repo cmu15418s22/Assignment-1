@@ -1,11 +1,9 @@
-
 // This is the standard function for determing whether a complex
 // point is in the Mandelbrot set
 static inline int mandel(float c_re, float c_im, int count) {
     float z_re = c_re, z_im = c_im;
     int i;
     for (i = 0; i < count; ++i) {
-
         if (z_re * z_re + z_im * z_im > 4.f)
             break;
 

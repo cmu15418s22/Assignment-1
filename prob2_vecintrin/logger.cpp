@@ -17,8 +17,7 @@ void Logger::addLog(const char *instruction, __cmu418_mask mask, int N) {
 }
 
 void Logger::printStats() {
-    printf("****************** Printing Vector Unit Statistics "
-           "*******************\n");
+    printf("****************** Printing Vector Unit Statistics *******************\n");
     printf("Vector Width:              %d\n", VECTOR_WIDTH);
     printf("Total Vector Instructions: %lld\n", stats.total_instructions);
     printf("Vector Utilization:        %f%%\n",
@@ -28,16 +27,13 @@ void Logger::printStats() {
 }
 
 void Logger::printLog() {
-    printf("***************** Printing Vector Unit Execution Log "
-           "*****************\n");
-    printf(" Instruction | Vector Lane Occupancy ('*' for active, '_' for "
-           "inactive)\n");
-    printf("------------- "
-           "--------------------------------------------------------\n");
+    printf("***************** Printing Vector Unit Execution Log *****************\n");
+    printf(" Instruction | Vector Lane Occupancy ('*' for active, '_' for inactive)\n");
+    printf("---------------------------------------------------------------------\n");
     for (int i = 0; i < log.size(); i++) {
         printf("%12s | ", log[i].instruction);
         for (int j = 0; j < VECTOR_WIDTH; j++) {
-            if (log[i].mask & (((unsigned long long)1) << j)) {
+            if (log[i].mask & (1ULL << j)) {
                 printf("*");
             } else {
                 printf("_");

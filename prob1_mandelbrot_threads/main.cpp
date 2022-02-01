@@ -38,15 +38,14 @@ void usage(const char *progname) {
 }
 
 bool verifyResult(int *gold, int *result, int width, int height) {
-    int i, j;
     int errLimit = 5;
     bool ok = true;
 
-    for (i = 0; i < height; i++) {
-        for (j = 0; j < width; j++) {
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
             if (gold[i * width + j] != result[i * width + j]) {
-                printf("Mismatch : [%d][%d], Expected : %d, Actual : %d\n", i,
-                       j, gold[i * width + j], result[i * width + j]);
+                printf("Mismatch : [%d][%d], Expected : %d, Actual : %d\n",
+                       i, j, gold[i * width + j], result[i * width + j]);
                 ok = false;
                 if (--errLimit <= 0) {
                     printf(" ...\n");
@@ -76,22 +75,25 @@ int main(int argc, char **argv) {
     float y1 = 1;
 
     // Support VIEWCNT views
-    float scaleValues[VIEWCNT] = {0.01f, 1.0f,  0.015f, 0.02f,
-                                  0.02f, 0.02f, 0.002f};
+    float scaleValues[VIEWCNT] = {0.01f, 1.0f,  0.015f, 0.02f, 0.02f, 0.02f, 0.002f};
     float shiftXs[VIEWCNT] = {0.0f, 0.0f, -0.98f, 0.35f, 0.0f, -1.5f, -1.4f};
     float shiftYs[VIEWCNT] = {0.0f, 0.0f, 0.30f, 0.05f, 0.73f, 0.0f, 0.0f};
 
     // parse commandline options ////////////////////////////////////////////
     int opt;
     static struct option long_options[] = {
-        {"threads", 1, 0, 't'}, {"view", 1, 0, 'v'}, {"field", 1, 0, 'f'},
-        {"out", 1, 0, 'o'},     {"help", 0, 0, '?'}, {0, 0, 0, 0}};
+        {"threads", 1, 0, 't'},
+        {"view", 1, 0, 'v'},
+        {"field", 1, 0, 'f'},
+        {"out", 1, 0, 'o'},
+        {"help", 0, 0, '?'},
+        {0, 0, 0, 0}
+    };
 
     int viewIndex = 0;
     char fname[256];
     bool have_file = false;
-    while ((opt = getopt_long(argc, argv, "t:v:f:o:?", long_options, NULL)) !=
-           EOF) {
+    while ((opt = getopt_long(argc, argv, "t:v:f:o:?", long_options, NULL)) != EOF) {
         switch (opt) {
         case 't': {
             numThreads = atoi(optarg);
@@ -124,18 +126,16 @@ int main(int argc, char **argv) {
             return 1;
         }
     }
-    // end parsing of commandline options
+    // End parsing of commandline options
     float scaleValue = scaleValues[viewIndex];
     float shiftX = shiftXs[viewIndex];
     float shiftY = shiftYs[viewIndex];
     scaleAndShift(x0, x1, y0, y1, scaleValue, shiftX, shiftY);
 
     if (have_file) {
-        // In this mode, assume goal is to simply generate the output as fast as
-        // possible
+        // In this mode, assume goal is to simply generate the output as fast as possible
         int *output = new int[width * height];
-        mandelbrotThread(numThreads, x0, y0, x1, y1, width, iheight,
-                         maxIterations, output);
+        mandelbrotThread(numThreads, x0, y0, x1, y1, width, iheight, maxIterations, output);
         writePPMImage(output, width, height, fname, maxIterations);
         delete[] output;
         exit(0);
@@ -153,8 +153,7 @@ int main(int argc, char **argv) {
     double minSerial = 1e30;
     for (int i = 0; i < numRuns; ++i) {
         double startTime = CycleTimer::currentSeconds();
-        mandelbrotSerial(x0, y0, x1, y1, width, iheight, 0, iheight,
-                         maxIterations, output_serial);
+        mandelbrotSerial(x0, y0, x1, y1, width, iheight, 0, iheight, maxIterations, output_serial);
         double endTime = CycleTimer::currentSeconds();
         minSerial = std::min(minSerial, endTime - startTime);
     }
@@ -170,8 +169,7 @@ int main(int argc, char **argv) {
     double minThread = 1e30;
     for (int i = 0; i < numRuns; ++i) {
         double startTime = CycleTimer::currentSeconds();
-        mandelbrotThread(numThreads, x0, y0, x1, y1, width, iheight,
-                         maxIterations, output_thread);
+        mandelbrotThread(numThreads, x0, y0, x1, y1, width, iheight, maxIterations, output_thread);
         double endTime = CycleTimer::currentSeconds();
         minThread = std::min(minThread, endTime - startTime);
     }
@@ -190,8 +188,7 @@ int main(int argc, char **argv) {
     }
 
     // compute speedup
-    printf("++++\t\t\t\t(%.2fx speedup from %d threads)\n",
-           minSerial / minThread, numThreads);
+    printf("++++\t\t\t\t(%.2fx speedup from %d threads)\n", minSerial / minThread, numThreads);
 
     delete[] output_serial;
     delete[] output_thread;

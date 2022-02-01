@@ -17,15 +17,14 @@ extern void writePPMImage(int *data, int width, int height,
                           const char *filename, int maxIterations);
 
 bool verifyResult(int *gold, int *result, int width, int height) {
-    int i, j;
     int errLimit = 5;
     bool ok = true;
 
-    for (i = 0; i < height; i++) {
-        for (j = 0; j < width; j++) {
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
             if (gold[i * width + j] != result[i * width + j]) {
-                printf("Mismatch : [%d][%d], Expected : %d, Actual : %d\n", i,
-                       j, gold[i * width + j], result[i * width + j]);
+                printf("Mismatch : [%d][%d], Expected : %d, Actual : %d\n",
+                       i, j, gold[i * width + j], result[i * width + j]);
                 ok = false;
                 if (--errLimit <= 0) {
                     printf(" ...\n");
@@ -40,7 +39,6 @@ bool verifyResult(int *gold, int *result, int width, int height) {
 
 void scaleAndShift(float &x0, float &x1, float &y0, float &y1, float scale,
                    float shiftX, float shiftY) {
-
     x0 *= scale;
     x1 *= scale;
     y0 *= scale;
@@ -85,22 +83,21 @@ int main(int argc, char **argv) {
     bool useTasks = false;
 
     // Support VIEWCNT views
-    float scaleValues[VIEWCNT] = {0.01f, 1.0f,  0.015f, 0.02f,
-                                  0.02f, 0.02f, 0.002f};
+    float scaleValues[VIEWCNT] = {0.01f, 1.0f,  0.015f, 0.02f, 0.02f, 0.02f, 0.002f};
     float shiftXs[VIEWCNT] = {0.0f, 0.0f, -0.98f, 0.35f, 0.0f, -1.5f, -1.4f};
     float shiftYs[VIEWCNT] = {0.0f, 0.0f, 0.30f, 0.05f, 0.73f, 0.0f, 0.0f};
 
-    // parse commandline options ////////////////////////////////////////////
+    // Parse commandline options
     int opt;
-    static struct option long_options[] = {{"tasks", 0, 0, 't'},
-                                           {"view", 1, 0, 'v'},
-                                           {"help", 0, 0, '?'},
-                                           {0, 0, 0, 0}};
+    static struct option long_options[] = {
+        {"tasks", 0, 0, 't'},
+        {"view", 1, 0, 'v'},
+        {"help", 0, 0, '?'},
+        {0, 0, 0, 0}
+    };
 
     bool have_file = false;
-    while ((opt = getopt_long(argc, argv, "tv:f:o:?", long_options, NULL)) !=
-           EOF) {
-
+    while ((opt = getopt_long(argc, argv, "tv:f:o:?", long_options, NULL)) != EOF) {
         switch (opt) {
         case 't':
             useTasks = true;
@@ -131,7 +128,7 @@ int main(int argc, char **argv) {
             return 1;
         }
     }
-    // end parsing of commandline options
+    // End parsing of commandline options
     float scaleValue = scaleValues[viewIndex];
     float shiftX = shiftXs[viewIndex];
     float shiftY = shiftYs[viewIndex];
@@ -139,12 +136,11 @@ int main(int argc, char **argv) {
 
     if (have_file) {
         int *output = new int[width * height];
-        if (useTasks)
-            mandelbrot_ispc_withtasks(x0, y0, x1, y1, width, iheight,
-                                      maxIterations, output);
-        else
-            mandelbrot_ispc(x0, y0, x1, y1, width, iheight, maxIterations,
-                            output);
+        if (useTasks) {
+            mandelbrot_ispc_withtasks(x0, y0, x1, y1, width, iheight, maxIterations, output);
+        } else {
+            mandelbrot_ispc(x0, y0, x1, y1, width, iheight, maxIterations, output);
+        }
         writePPMImage(output, width, height, fname, maxIterations);
         delete[] output;
         exit(0);
@@ -207,7 +203,7 @@ int main(int argc, char **argv) {
     }
 
     //
-    // Compute the image using the ispc +ILP implementation
+    // Compute the image using the ispc + ILP implementation
     //
     // Clear out the buffer
     for (unsigned int i = 0; i < width * height; ++i)
@@ -242,9 +238,7 @@ int main(int argc, char **argv) {
 
     double minTaskISPC = 1e30;
     if (useTasks) {
-        //
         // Tasking version of the ISPC code
-        //
         for (int i = 0; i < numTries; ++i) {
             double startTime = CycleTimer::currentSeconds();
             mandelbrot_ispc_withtasks(x0, y0, x1, y1, width, iheight,
@@ -264,12 +258,11 @@ int main(int argc, char **argv) {
     }
 
     printf("\t\t\t\t(%.2fx speedup from ISPC)\n", minSerial / minISPC);
-    if (parOK)
-        printf("\t\t\t\t(%.2fx speedup from ISPC+parallelism)\n",
-               minSerial / minISPCPar);
+    if (parOK) {
+        printf("\t\t\t\t(%.2fx speedup from ISPC+parallelism)\n", minSerial / minISPCPar);
+    }
     if (useTasks) {
-        printf("\t\t\t\t(%.2fx speedup from task ISPC)\n",
-               minSerial / minTaskISPC);
+        printf("\t\t\t\t(%.2fx speedup from task ISPC)\n", minSerial / minTaskISPC);
     }
 
     delete[] output_serial;

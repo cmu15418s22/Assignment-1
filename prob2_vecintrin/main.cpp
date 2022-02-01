@@ -8,10 +8,8 @@ using namespace std;
 
 extern void absSerial(float *values, float *output, int N);
 extern void absVector(float *values, float *output, int N);
-extern void clampedExpSerial(float *values, int *exponents, float *output,
-                             int N);
-extern void clampedExpVector(float *values, int *exponents, float *output,
-                             int N);
+extern void clampedExpSerial(float *values, int *exponents, float *output, int N);
+extern void clampedExpVector(float *values, int *exponents, float *output, int N);
 extern float arraySumSerial(float *values, int N);
 extern float arraySumVector(float *values, int N);
 
@@ -20,16 +18,14 @@ extern float arraySumVector(float *values, int N);
 Logger CMU418Logger;
 
 void usage(const char *progname);
-void initValue(float *values, int *exponents, float *output, float *gold,
-               unsigned int N);
+void initValue(float *values, int *exponents, float *output, float *gold, unsigned int N);
 void absSerial(float *values, float *output, int N);
 void absVector(float *values, float *output, int N);
 void clampedExpSerial(float *values, int *exponents, float *output, int N);
 void clampedExpVector(float *values, int *exponents, float *output, int N);
 float arraySumSerial(float *values, int N);
 float arraySumVector(float *values, int N);
-bool verifyResult(float *values, int *exponents, float *output, float *gold,
-                  int N);
+bool verifyResult(float *values, int *exponents, float *output, float *gold, int N);
 
 int main(int argc, char *argv[]) {
     int N = 16;
@@ -37,13 +33,14 @@ int main(int argc, char *argv[]) {
 
     // parse commandline options ////////////////////////////////////////////
     int opt;
-    static struct option long_options[] = {{"size", 1, 0, 's'},
-                                           {"log", 0, 0, 'l'},
-                                           {"help", 0, 0, '?'},
-                                           {0, 0, 0, 0}};
+    static struct option long_options[] = {
+        {"size", 1, 0, 's'},
+        {"log", 0, 0, 'l'},
+        {"help", 0, 0, '?'},
+        {0, 0, 0, 0}
+    };
 
     while ((opt = getopt_long(argc, argv, "s:l?", long_options, NULL)) != EOF) {
-
         switch (opt) {
         case 's':
             N = atoi(optarg);
@@ -76,16 +73,16 @@ int main(int argc, char *argv[]) {
 
     printf("\e[1;31mCLAMPED EXPONENT\e[0m (required) \n");
     bool clampedCorrect = verifyResult(values, exponents, output, gold, N);
-    if (printLog)
+    if (printLog) {
         CMU418Logger.printLog();
+    }
     CMU418Logger.printStats();
 
-    printf("************************ Result Verification "
-           "*************************\n");
-    if (!clampedCorrect) {
-        printf("@@@ Failed!!!\n");
-    } else {
+    printf("************************ Result Verification *************************\n");
+    if (clampedCorrect) {
         printf("Passed!!!\n");
+    } else {
+        printf("@@@ Failed!!!\n");
     }
 
     printf("\n\e[1;31mARRAY SUM\e[0m (bonus) \n");
@@ -101,9 +98,7 @@ int main(int argc, char *argv[]) {
             printf("Passed!!!\n");
         }
     } else {
-        printf("Must have N % VECTOR_WIDTH == 0 for this problem (VECTOR_WIDTH "
-               "is %d)\n",
-               VECTOR_WIDTH);
+        printf("Must have N % VECTOR_WIDTH == 0 for this problem (VECTOR_WIDTH is %d)\n", VECTOR_WIDTH);
     }
 
     delete[] values;
@@ -122,11 +117,9 @@ void usage(const char *progname) {
     printf("  -?  --help         This message\n");
 }
 
-void initValue(float *values, int *exponents, float *output, float *gold,
-               unsigned int N) {
-
+void initValue(float *values, int *exponents, float *output, float *gold, unsigned int N) {
     for (unsigned int i = 0; i < N + VECTOR_WIDTH; i++) {
-        // random input values
+        // Random input values
         values[i] = -1.f - 0.01f * static_cast<float>(rand()) / RAND_MAX;
         exponents[i] = rand() % EXP_MAX;
         output[i] = 0.f;
@@ -134,8 +127,7 @@ void initValue(float *values, int *exponents, float *output, float *gold,
     }
 }
 
-bool verifyResult(float *values, int *exponents, float *output, float *gold,
-                  int N) {
+bool verifyResult(float *values, int *exponents, float *output, float *gold, int N) {
     int incorrect = -1;
     float epsilon = 0.00001;
     for (int i = 0; i < N + VECTOR_WIDTH; i++) {
@@ -146,8 +138,9 @@ bool verifyResult(float *values, int *exponents, float *output, float *gold,
     }
 
     if (incorrect != -1) {
-        if (incorrect >= N)
+        if (incorrect >= N) {
             printf("You have written to out of bound value!\n");
+        }
         printf("Wrong calculation at value[%d]!\n", incorrect);
         printf("value  = ");
         for (int i = 0; i < N; i++) {

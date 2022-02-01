@@ -35,16 +35,16 @@ void absVector(float *values, float *output, int N) {
         maskIsNegative = _cmu418_init_ones(0);
 
         // Load vector of values from contiguous memory addresses
-        _cmu418_vload_float(x, values + i, maskAll); // x = values[i];
+        _cmu418_vload_float(x, values + i, maskAll);                // x = values[i];
 
         // Set mask according to predicate
-        _cmu418_vlt_float(maskIsNegative, x, zero, maskAll); // if (x < 0) {
+        _cmu418_vlt_float(maskIsNegative, x, zero, maskAll);        // if (x < 0) {
 
         // Execute instruction using mask ("if" clause)
-        _cmu418_vsub_float(result, zero, x, maskIsNegative); //   output[i] = -x;
+        _cmu418_vsub_float(result, zero, x, maskIsNegative);        //   output[i] = -x;
 
         // Inverse maskIsNegative to generate "else" mask
-        maskIsNotNegative = _cmu418_mask_not(maskIsNegative); // } else {
+        maskIsNotNegative = _cmu418_mask_not(maskIsNegative);       // } else {
 
         // Execute instruction ("else" clause)
         _cmu418_vload_float(result, values + i, maskIsNotNegative); //   output[i] = x; }

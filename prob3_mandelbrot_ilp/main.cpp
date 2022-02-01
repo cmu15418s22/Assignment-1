@@ -12,7 +12,6 @@ extern void writePPMImage(int *data, int width, int height,
 
 void scaleAndShift(float &x0, float &x1, float &y0, float &y1, float scale,
                    float shiftX, float shiftY) {
-
     x0 *= scale;
     x1 *= scale;
     y0 *= scale;
@@ -40,8 +39,8 @@ bool verifyResult(int *gold, int *result, int width, int height) {
     for (i = 0; i < height; i++) {
         for (j = 0; j < width; j++) {
             if (gold[i * width + j] != result[i * width + j]) {
-                printf("Mismatch : [%d][%d], Expected : %d, Actual : %d\n", i,
-                       j, gold[i * width + j], result[i * width + j]);
+                printf("Mismatch : [%d][%d], Expected : %d, Actual : %d\n",
+                       i, j, gold[i * width + j], result[i * width + j]);
                 ok = false;
                 if (--errLimit <= 0) {
                     printf(" ...\n");
@@ -71,26 +70,26 @@ int main(int argc, char **argv) {
     float y1 = 1;
 
     // Support VIEWCNT views
-    float scaleValues[VIEWCNT] = {0.01f, 1.0f,  0.015f, 0.02f,
-                                  0.02f, 0.02f, 0.002f};
+    float scaleValues[VIEWCNT] = {0.01f, 1.0f,  0.015f, 0.02f, 0.02f, 0.02f, 0.002f};
     float shiftXs[VIEWCNT] = {0.0f, 0.0f, -0.98f, 0.35f, 0.0f, -1.5f, -1.4f};
     float shiftYs[VIEWCNT] = {0.0f, 0.0f, 0.30f, 0.05f, 0.73f, 0.0f, 0.0f};
 
-    // parse commandline options ////////////////////////////////////////////
+    // Parse commandline options
     int opt;
     static struct option long_options[] = {
-        {"view", 1, 0, 'v'}, {"help", 0, 0, '?'}, {0, 0, 0, 0}};
+        {"view", 1, 0, 'v'},
+        {"help", 0, 0, '?'},
+        {0, 0, 0, 0}
+    };
 
     int viewIndex = 0;
     char fname[256];
     bool have_file = false;
-    while ((opt = getopt_long(argc, argv, "v:f:o:?", long_options, NULL)) !=
-           EOF) {
-
+    while ((opt = getopt_long(argc, argv, "v:f:o:?", long_options, NULL)) != EOF) {
         switch (opt) {
         case 'v': {
             viewIndex = atoi(optarg);
-            // change view settings
+            // Change view settings
             if (viewIndex < 0 || viewIndex >= VIEWCNT) {
                 fprintf(stderr, "Invalid view index %d\n", viewIndex);
                 return 1;
@@ -115,7 +114,8 @@ int main(int argc, char **argv) {
             return 1;
         }
     }
-    // end parsing of commandline options
+    // End parsing of commandline options
+
     float scaleValue = scaleValues[viewIndex];
     float shiftX = shiftXs[viewIndex];
     float shiftY = shiftYs[viewIndex];
@@ -126,8 +126,7 @@ int main(int argc, char **argv) {
         // possible
         int *output = new int[width * height];
         mandelbrotParallel(par_funs[3].fun, par_funs[3].unrollCount, x0, y0, x1,
-                           y1, width, iheight, 0, height, maxIterations,
-                           output);
+                           y1, width, iheight, 0, height, maxIterations, output);
         writePPMImage(output, width, height, fname, maxIterations);
         delete[] output;
         exit(0);
@@ -157,8 +156,7 @@ int main(int argc, char **argv) {
     double ms = minRef * 1e3;
     double ns = minRef / numIters * 1e9;
     double cycs = clock_rate * ns;
-    printf("[mandelbrot reference].\t\t[%.3f] ms.\tPer iteration:\t[%.3f] "
-           "ns\t[%.2f] cycles\n",
+    printf("[mandelbrot reference].\t\t[%.3f] ms.\tPer iteration:\t[%.3f] ns\t[%.2f] cycles\n",
            ms, ns, cycs);
     sprintf(fname, "mandelbrot-v%d-ref.ppm", viewIndex);
     writePPMImage(output_ref, width, height, fname, maxIterations);
@@ -177,11 +175,9 @@ int main(int argc, char **argv) {
         ms = minParallel * 1e3;
         ns = minParallel / numIters * 1e9;
         cycs = clock_rate * ns;
-        printf("[mandelbrot %s].\t[%.3f] ms.\tPer iteration:\t[%.3f] "
-               "ns\t[%.2f] cycles\tSpeedup\t[%.2f]\n",
+        printf("[mandelbrot %s].\t[%.3f] ms.\tPer iteration:\t[%.3f] ns\t[%.2f] cycles\tSpeedup\t[%.2f]\n",
                par_funs[j].name, ms, ns, cycs, minRef / minParallel);
-        sprintf(fname, "mandelbrot-v%d-par%d.ppm", viewIndex,
-                par_funs[j].unrollCount);
+        sprintf(fname, "mandelbrot-v%d-par%d.ppm", viewIndex, par_funs[j].unrollCount);
         writePPMImage(output_par, width, height, fname, maxIterations);
         verifyResult(output_ref, output_par, width, height);
     }

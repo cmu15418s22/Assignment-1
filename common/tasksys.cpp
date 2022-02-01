@@ -28,7 +28,7 @@
    PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
    LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
    NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
+   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 /*
@@ -46,52 +46,52 @@
 */
 
 #if defined(_WIN32) || defined(_WIN64)
-  #define ISPC_IS_WINDOWS
-  #define ISPC_USE_CONCRT
+#define ISPC_IS_WINDOWS
+#define ISPC_USE_CONCRT
 #elif defined(__linux__)
-  #define ISPC_IS_LINUX
-  #define ISPC_USE_PTHREADS
+#define ISPC_IS_LINUX
+#define ISPC_USE_PTHREADS
 #elif defined(__APPLE__)
-  #define ISPC_IS_APPLE
-  #define ISPC_USE_GCD
+#define ISPC_IS_APPLE
+#define ISPC_USE_GCD
 #endif
 
-#define DBG(x) 
+#define DBG(x)
 
 #ifdef ISPC_IS_WINDOWS
-  #define NOMINMAX
-  #include <windows.h>
+#define NOMINMAX
+#include <windows.h>
 #endif // ISPC_IS_WINDOWS
 #ifdef ISPC_USE_CONCRT
-  #include <concrt.h>
-  using namespace Concurrency;
+#include <concrt.h>
+using namespace Concurrency;
 #endif // ISPC_USE_CONCRT
 #ifdef ISPC_USE_GCD
-  #include <dispatch/dispatch.h>
-  #include <pthread.h>
+#include <dispatch/dispatch.h>
+#include <pthread.h>
 #endif // ISPC_USE_GCD
 #ifdef ISPC_USE_PTHREADS
-  #include <pthread.h>
-  #include <semaphore.h>
-  #include <unistd.h>
-  #include <fcntl.h>
-  #include <errno.h>
-  #include <sys/types.h>
-  #include <sys/stat.h>
-  #include <sys/param.h>
-  #include <sys/sysctl.h>
-  #include <vector>
-  #include <algorithm>
+#include <algorithm>
+#include <errno.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <sys/param.h>
+#include <sys/stat.h>
+#include <sys/sysctl.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <vector>
 #endif // ISPC_USE_PTHREADS
 #ifdef ISPC_IS_LINUX
-  #include <malloc.h>
+#include <malloc.h>
 #endif // ISPC_IS_LINUX
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <string.h>
 #include <algorithm>
+#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // Signature of ispc-generated 'task' functions
 typedef void (*TaskFuncType)(void *data, int threadIndex, int threadCount,
@@ -112,7 +112,7 @@ struct TaskInfo {
 
 #define LOG_TASK_QUEUE_CHUNK_SIZE 14
 #define MAX_TASK_QUEUE_CHUNKS 8
-#define TASK_QUEUE_CHUNK_SIZE (1<<LOG_TASK_QUEUE_CHUNK_SIZE)
+#define TASK_QUEUE_CHUNK_SIZE (1 << LOG_TASK_QUEUE_CHUNK_SIZE)
 
 #define MAX_LAUNCHED_TASKS (MAX_TASK_QUEUE_CHUNKS * TASK_QUEUE_CHUNK_SIZE)
 
@@ -126,7 +126,7 @@ class TaskGroup;
     of the tasks in its task group to finish before it actually returns.
  */
 class TaskGroupBase {
-public:
+  public:
     void Reset();
 
     int AllocTaskInfo(int count);
@@ -134,13 +134,13 @@ public:
 
     void *AllocMemory(int64_t size, int32_t alignment);
 
-protected:
+  protected:
     TaskGroupBase();
     ~TaskGroupBase();
 
     int nextTaskInfoIndex;
 
-private:
+  private:
     /* We allocate blocks of TASK_QUEUE_CHUNK_SIZE TaskInfo structures as
        needed by the calling function.  We hold up to MAX_TASK_QUEUE_CHUNKS
        of these (and then exit at runtime if more than this many tasks are
@@ -159,11 +159,10 @@ private:
     char mem[256];
 };
 
+inline TaskGroupBase::TaskGroupBase() {
+    nextTaskInfoIndex = 0;
 
-inline TaskGroupBase::TaskGroupBase() { 
-    nextTaskInfoIndex = 0; 
-
-    curMemBuffer = 0; 
+    curMemBuffer = 0;
     curMemBufferOffset = 0;
     memBuffers[0] = mem;
     memBufferSize[0] = sizeof(mem) / sizeof(mem[0]);
@@ -176,7 +175,6 @@ inline TaskGroupBase::TaskGroupBase() {
         taskInfo[i] = NULL;
 }
 
-
 inline TaskGroupBase::~TaskGroupBase() {
     // Note: don't delete memBuffers[0], since it points to the start of
     // the "mem" member!
@@ -184,34 +182,31 @@ inline TaskGroupBase::~TaskGroupBase() {
         delete[] memBuffers[i];
 }
 
-
-inline void
-TaskGroupBase::Reset() {
-    nextTaskInfoIndex = 0; 
-    curMemBuffer = 0; 
+inline void TaskGroupBase::Reset() {
+    nextTaskInfoIndex = 0;
+    curMemBuffer = 0;
     curMemBufferOffset = 0;
 }
 
-
-inline int
-TaskGroupBase::AllocTaskInfo(int count) {
+inline int TaskGroupBase::AllocTaskInfo(int count) {
     int ret = nextTaskInfoIndex;
     nextTaskInfoIndex += count;
     return ret;
 }
 
-
-inline TaskInfo *
-TaskGroupBase::GetTaskInfo(int index) {
+inline TaskInfo *TaskGroupBase::GetTaskInfo(int index) {
     int chunk = (index >> LOG_TASK_QUEUE_CHUNK_SIZE);
-    int offset = index & (TASK_QUEUE_CHUNK_SIZE-1);
+    int offset = index & (TASK_QUEUE_CHUNK_SIZE - 1);
 
     if (chunk == MAX_TASK_QUEUE_CHUNKS) {
-        fprintf(stderr, "A total of %d tasks have been launched from the "
-                "current function--the simple built-in task system can handle "
-                "no more. You can increase the values of TASK_QUEUE_CHUNK_SIZE "
-                "and LOG_TASK_QUEUE_CHUNK_SIZE to work around this limitation.  "
-                "Sorry!  Exiting.\n", index);
+        fprintf(
+            stderr,
+            "A total of %d tasks have been launched from the "
+            "current function--the simple built-in task system can handle "
+            "no more. You can increase the values of TASK_QUEUE_CHUNK_SIZE "
+            "and LOG_TASK_QUEUE_CHUNK_SIZE to work around this limitation.  "
+            "Sorry!  Exiting.\n",
+            index);
         exit(1);
     }
 
@@ -220,12 +215,10 @@ TaskGroupBase::GetTaskInfo(int index) {
     return &taskInfo[chunk][offset];
 }
 
-
-inline void *
-TaskGroupBase::AllocMemory(int64_t size, int32_t alignment) {
+inline void *TaskGroupBase::AllocMemory(int64_t size, int32_t alignment) {
     char *basePtr = memBuffers[curMemBuffer];
     int64_t iptr = (int64_t)(basePtr + curMemBufferOffset);
-    iptr = (iptr + (alignment-1)) & ~(alignment-1);
+    iptr = (iptr + (alignment - 1)) & ~(alignment - 1);
 
     int newOffset = int(iptr + size - (int64_t)basePtr);
     if (newOffset < memBufferSize[curMemBuffer]) {
@@ -238,78 +231,72 @@ TaskGroupBase::AllocMemory(int64_t size, int32_t alignment) {
     assert(curMemBuffer < NUM_MEM_BUFFERS);
 
     int allocSize = 1 << (12 + curMemBuffer);
-    allocSize = std::max(int(size+alignment), allocSize);
+    allocSize = std::max(int(size + alignment), allocSize);
     char *newBuf = new char[allocSize];
     memBufferSize[curMemBuffer] = allocSize;
     memBuffers[curMemBuffer] = newBuf;
     return AllocMemory(size, alignment);
 }
 
-
 ///////////////////////////////////////////////////////////////////////////
 // Atomics and the like
 
 #ifndef ISPC_IS_WINDOWS
-static inline void
-lMemFence() {
-    __asm__ __volatile__("mfence":::"memory");
+static inline void lMemFence() {
+    __asm__ __volatile__("mfence" ::: "memory");
 }
 #endif // !ISPC_IS_WINDOWS
 
-
 #if (__SIZEOF_POINTER__ == 4) || defined(__i386__) || defined(_WIN32)
 #define ISPC_POINTER_BYTES 4
-#elif (__SIZEOF_POINTER__ == 8) || defined(__x86_64__) || defined(__amd64__) || defined(_WIN64)
+#elif (__SIZEOF_POINTER__ == 8) || defined(__x86_64__) ||                      \
+    defined(__amd64__) || defined(_WIN64)
 #define ISPC_POINTER_BYTES 8
 #else
 #error "Pointer size unknown!"
 #endif // __SIZEOF_POINTER__
 
-
-static void *
-lAtomicCompareAndSwapPointer(void **v, void *newValue, void *oldValue) {
+static void *lAtomicCompareAndSwapPointer(void **v, void *newValue,
+                                          void *oldValue) {
 #ifdef ISPC_IS_WINDOWS
     return InterlockedCompareExchangePointer(v, newValue, oldValue);
 #else
     void *result;
 #if (ISPC_POINTER_BYTES == 4)
     __asm__ __volatile__("lock\ncmpxchgd %2,%1"
-                          : "=a"(result), "=m"(*v)
-                          : "q"(newValue), "0"(oldValue)
-                          : "memory");
+                         : "=a"(result), "=m"(*v)
+                         : "q"(newValue), "0"(oldValue)
+                         : "memory");
 #else
     __asm__ __volatile__("lock\ncmpxchgq %2,%1"
-                          : "=a"(result), "=m"(*v)
-                          : "q"(newValue), "0"(oldValue)
-                          : "memory");
+                         : "=a"(result), "=m"(*v)
+                         : "q"(newValue), "0"(oldValue)
+                         : "memory");
 #endif // ISPC_POINTER_BYTES
     lMemFence();
     return result;
 #endif // ISPC_IS_WINDOWS
 }
 
-
-
 #ifndef ISPC_IS_WINDOWS
-static int32_t 
-lAtomicCompareAndSwap32(volatile int32_t *v, int32_t newValue, int32_t oldValue) {
+static int32_t lAtomicCompareAndSwap32(volatile int32_t *v, int32_t newValue,
+                                       int32_t oldValue) {
     int32_t result;
     __asm__ __volatile__("lock\ncmpxchgl %2,%1"
-                          : "=a"(result), "=m"(*v)
-                          : "q"(newValue), "0"(oldValue)
-                          : "memory");
+                         : "=a"(result), "=m"(*v)
+                         : "q"(newValue), "0"(oldValue)
+                         : "memory");
     lMemFence();
     return result;
 }
 #endif // !ISPC_IS_WINDOWS
-
 
 ///////////////////////////////////////////////////////////////////////////
 
 #ifdef ISPC_USE_CONCRT
 // With ConcRT, we don't need to extend TaskGroupBase at all.
 class TaskGroup : public TaskGroupBase {
-public:
+  public:
     void Launch(int baseIndex, int count);
     void Sync();
 };
@@ -321,7 +308,7 @@ public:
    wait on all of the tasks in the group to finish.)
  */
 class TaskGroup : public TaskGroupBase {
-public:
+  public:
     TaskGroup() {
         gcdGroup = dispatch_group_create();
     }
@@ -329,7 +316,7 @@ public:
     void Launch(int baseIndex, int count);
     void Sync();
 
-private:
+  private:
     dispatch_group_t gcdGroup;
 };
 #endif // ISPC_USE_GCD
@@ -338,7 +325,7 @@ private:
 static void *lTaskEntry(void *arg);
 
 class TaskGroup : public TaskGroupBase {
-public:
+  public:
     TaskGroup() {
         numUnfinishedTasks = 0;
         waitingTasks.reserve(128);
@@ -355,7 +342,7 @@ public:
     void Launch(int baseIndex, int count);
     void Sync();
 
-private:
+  private:
     friend void *lTaskEntry(void *arg);
 
     int32_t numUnfinishedTasks;
@@ -365,7 +352,6 @@ private:
 };
 
 #endif // ISPC_USE_PTHREADS
-
 
 ///////////////////////////////////////////////////////////////////////////
 // Grand Central Dispatch
@@ -378,15 +364,15 @@ private:
 static dispatch_queue_t gcdQueue;
 static volatile int32_t lock = 0;
 
-static void
-InitTaskSystem() {
+static void InitTaskSystem() {
     if (gcdQueue != NULL)
         return;
 
     while (1) {
         if (lAtomicCompareAndSwap32(&lock, 1, 0) == 0) {
             if (gcdQueue == NULL) {
-                gcdQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+                gcdQueue = dispatch_get_global_queue(
+                    DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
                 assert(gcdQueue != NULL);
                 lMemFence();
             }
@@ -396,9 +382,7 @@ InitTaskSystem() {
     }
 }
 
-
-static void
-lRunTask(void *ti) {
+static void lRunTask(void *ti) {
     TaskInfo *taskInfo = (TaskInfo *)ti;
     // FIXME: these are bogus values; may cause bugs in code that depends
     // on them having unique values in different threads.
@@ -406,22 +390,18 @@ lRunTask(void *ti) {
     int threadCount = 1;
 
     // Actually run the task
-    taskInfo->func(taskInfo->data, threadIndex, threadCount, 
+    taskInfo->func(taskInfo->data, threadIndex, threadCount,
                    taskInfo->taskIndex, taskInfo->taskCount);
 }
 
-
-inline void
-TaskGroup::Launch(int baseIndex, int count) {
+inline void TaskGroup::Launch(int baseIndex, int count) {
     for (int i = 0; i < count; ++i) {
         TaskInfo *ti = GetTaskInfo(baseIndex + i);
         dispatch_group_async_f(gcdGroup, gcdQueue, ti, lRunTask);
     }
 }
 
-
-inline void
-TaskGroup::Sync() {
+inline void TaskGroup::Sync() {
     dispatch_group_wait(gcdGroup, DISPATCH_TIME_FOREVER);
 }
 
@@ -432,17 +412,14 @@ TaskGroup::Sync() {
 
 #ifdef ISPC_USE_CONCRT
 
-static void
-InitTaskSystem() {
+static void InitTaskSystem() {
     // No initialization needed
 }
 
-
-static void __cdecl
-lRunTask(LPVOID param) {
+static void __cdecl lRunTask(LPVOID param) {
     TaskInfo *ti = (TaskInfo *)param;
-    
-    // Actually run the task. 
+
+    // Actually run the task.
     // FIXME: like the GCD implementation for OS X, this is passing bogus
     // values for the threadIndex and threadCount builtins, which in turn
     // will cause bugs in code that uses those.
@@ -454,16 +431,12 @@ lRunTask(LPVOID param) {
     ti->taskEvent.set();
 }
 
-
-inline void
-TaskGroup::Launch(int baseIndex, int count) {
+inline void TaskGroup::Launch(int baseIndex, int count) {
     for (int i = 0; i < count; ++i)
         CurrentScheduler::ScheduleTask(lRunTask, GetTaskInfo(baseIndex + i));
 }
 
-
-inline void
-TaskGroup::Sync() {
+inline void TaskGroup::Sync() {
     for (int i = 0; i < nextTaskInfoIndex; ++i) {
         TaskInfo *ti = GetTaskInfo(i);
         ti->taskEvent.wait();
@@ -487,20 +460,17 @@ static pthread_mutex_t taskSysMutex;
 static std::vector<TaskGroup *> activeTaskGroups;
 static sem_t *workerSemaphore;
 
-
-static inline int32_t 
-lAtomicAdd(int32_t *v, int32_t delta) {
+static inline int32_t lAtomicAdd(int32_t *v, int32_t delta) {
     int32_t origValue;
     __asm__ __volatile__("lock\n"
                          "xaddl %0,%1"
-                         : "=r"(origValue), "=m"(*v) : "0"(delta)
+                         : "=r"(origValue), "=m"(*v)
+                         : "0"(delta)
                          : "memory");
     return origValue;
 }
 
-
-static void *
-lTaskEntry(void *arg) {
+static void *lTaskEntry(void *arg) {
     int threadIndex = (int)((int64_t)arg);
     int threadCount = nThreads;
 
@@ -519,7 +489,8 @@ lTaskEntry(void *arg) {
         // Acquire the mutex
         //
         if ((err = pthread_mutex_lock(&taskSysMutex)) != 0) {
-            fprintf(stderr, "Error from pthread_mutex_lock: %s\n", strerror(err));
+            fprintf(stderr, "Error from pthread_mutex_lock: %s\n",
+                    strerror(err));
             exit(1);
         }
 
@@ -528,7 +499,8 @@ lTaskEntry(void *arg) {
             // Task queue is empty, go back and wait on the semaphore
             //
             if ((err = pthread_mutex_unlock(&taskSysMutex)) != 0) {
-                fprintf(stderr, "Error from pthread_mutex_unlock: %s\n", strerror(err));
+                fprintf(stderr, "Error from pthread_mutex_unlock: %s\n",
+                        strerror(err));
                 exit(1);
             }
             continue;
@@ -549,9 +521,10 @@ lTaskEntry(void *arg) {
             activeTaskGroups.pop_back();
             tg->inActiveList = false;
         }
-    
+
         if ((err = pthread_mutex_unlock(&taskSysMutex)) != 0) {
-            fprintf(stderr, "Error from pthread_mutex_unlock: %s\n", strerror(err));
+            fprintf(stderr, "Error from pthread_mutex_unlock: %s\n",
+                    strerror(err));
             exit(1);
         }
 
@@ -575,9 +548,7 @@ lTaskEntry(void *arg) {
     return 0;
 }
 
-
-static void
-InitTaskSystem() {
+static void InitTaskSystem() {
     if (threads == NULL) {
         while (1) {
             if (lAtomicCompareAndSwap32(&lock, 1, 0) == 0) {
@@ -589,23 +560,28 @@ InitTaskSystem() {
 
                     int err;
                     if ((err = pthread_mutex_init(&taskSysMutex, NULL)) != 0) {
-                        fprintf(stderr, "Error creating mutex: %s\n", strerror(err));
+                        fprintf(stderr, "Error creating mutex: %s\n",
+                                strerror(err));
                         exit(1);
                     }
 
                     char name[32];
                     sprintf(name, "ispc_task.%d", (int)getpid());
-                    workerSemaphore = sem_open(name, O_CREAT, S_IRUSR|S_IWUSR, 0);
+                    workerSemaphore =
+                        sem_open(name, O_CREAT, S_IRUSR | S_IWUSR, 0);
                     if (!workerSemaphore) {
-                        fprintf(stderr, "Error creating semaphore: %s\n", strerror(err));
+                        fprintf(stderr, "Error creating semaphore: %s\n",
+                                strerror(err));
                         exit(1);
                     }
 
                     threads = (pthread_t *)malloc(nThreads * sizeof(pthread_t));
                     for (intptr_t i = 0; i < nThreads; ++i) {
-                        err = pthread_create(&threads[i], NULL, &lTaskEntry, (void *) i);
+                        err = pthread_create(&threads[i], NULL, &lTaskEntry,
+                                             (void *)i);
                         if (err != 0) {
-                            fprintf(stderr, "Error creating pthread %lu: %s\n", i, strerror(err));
+                            fprintf(stderr, "Error creating pthread %lu: %s\n",
+                                    i, strerror(err));
                             exit(1);
                         }
                     }
@@ -623,9 +599,7 @@ InitTaskSystem() {
     }
 }
 
-
-inline void
-TaskGroup::Launch(int baseCoord, int count) {
+inline void TaskGroup::Launch(int baseCoord, int count) {
     //
     // Acquire mutex, add task
     //
@@ -675,16 +649,15 @@ TaskGroup::Launch(int baseCoord, int count) {
         }
 }
 
-
-inline void
-TaskGroup::Sync() {
-    DBG(fprintf(stderr, "syncing %p - %d unfinished\n", tg, numUnfinishedTasks));
+inline void TaskGroup::Sync() {
+    DBG(fprintf(stderr, "syncing %p - %d unfinished\n", tg,
+                numUnfinishedTasks));
 
     while (numUnfinishedTasks > 0) {
         // All of the tasks in this group aren't finished yet.  We'll try
         // to help out here since we don't have anything else to do...
 
-        DBG(fprintf(stderr, "while syncing %p - %d unfinished\n", tg, 
+        DBG(fprintf(stderr, "while syncing %p - %d unfinished\n", tg,
                     numUnfinishedTasks));
 
         //
@@ -692,7 +665,8 @@ TaskGroup::Sync() {
         //
         int err;
         if ((err = pthread_mutex_lock(&taskSysMutex)) != 0) {
-            fprintf(stderr, "Error from pthread_mutex_lock: %s\n", strerror(err));
+            fprintf(stderr, "Error from pthread_mutex_lock: %s\n",
+                    strerror(err));
             exit(1);
         }
 
@@ -710,9 +684,9 @@ TaskGroup::Sync() {
                 inActiveList = false;
             }
             myTask = GetTaskInfo(taskNumber);
-            DBG(fprintf(stderr, "running task %d from group %p in sync\n", taskNumber, tg));
-        }
-        else {
+            DBG(fprintf(stderr, "running task %d from group %p in sync\n",
+                        taskNumber, tg));
+        } else {
             // Other threads are already working on all of the tasks in
             // this group, so we can't help out by running one ourself.
             // We'll try to run one from another group to make ourselves
@@ -720,7 +694,8 @@ TaskGroup::Sync() {
             if (activeTaskGroups.size() == 0) {
                 // No active task groups left--there's nothing for us to do.
                 if ((err = pthread_mutex_unlock(&taskSysMutex)) != 0) {
-                    fprintf(stderr, "Error from pthread_mutex_unlock: %s\n", strerror(err));
+                    fprintf(stderr, "Error from pthread_mutex_unlock: %s\n",
+                            strerror(err));
                     exit(1);
                 }
                 // FIXME: We basically end up busy-waiting here, which is
@@ -745,15 +720,16 @@ TaskGroup::Sync() {
                 runtg->inActiveList = false;
             }
             myTask = runtg->GetTaskInfo(taskNumber);
-            DBG(fprintf(stderr, "running task %d from other group %p in sync\n", 
+            DBG(fprintf(stderr, "running task %d from other group %p in sync\n",
                         taskNumber, runtg));
         }
 
         if ((err = pthread_mutex_unlock(&taskSysMutex)) != 0) {
-            fprintf(stderr, "Error from pthread_mutex_unlock: %s\n", strerror(err));
+            fprintf(stderr, "Error from pthread_mutex_unlock: %s\n",
+                    strerror(err));
             exit(1);
         }
-    
+
         //
         // Do work for _myTask_
         //
@@ -776,12 +752,12 @@ TaskGroup::Sync() {
 #define MAX_FREE_TASK_GROUPS 64
 static TaskGroup *freeTaskGroups[MAX_FREE_TASK_GROUPS];
 
-static inline TaskGroup *
-AllocTaskGroup() {
+static inline TaskGroup *AllocTaskGroup() {
     for (int i = 0; i < MAX_FREE_TASK_GROUPS; ++i) {
         TaskGroup *tg = freeTaskGroups[i];
         if (tg != NULL) {
-            void *ptr = lAtomicCompareAndSwapPointer((void **)(&freeTaskGroups[i]), NULL, tg);
+            void *ptr = lAtomicCompareAndSwapPointer(
+                (void **)(&freeTaskGroups[i]), NULL, tg);
             if (ptr != NULL) {
                 assert(ptr == tg);
                 return (TaskGroup *)ptr;
@@ -792,14 +768,13 @@ AllocTaskGroup() {
     return new TaskGroup;
 }
 
-
-static inline void
-FreeTaskGroup(TaskGroup *tg) {
+static inline void FreeTaskGroup(TaskGroup *tg) {
     tg->Reset();
 
     for (int i = 0; i < MAX_FREE_TASK_GROUPS; ++i) {
         if (freeTaskGroups[i] == NULL) {
-            void *ptr = lAtomicCompareAndSwapPointer((void **)&freeTaskGroups[i], tg, NULL);
+            void *ptr = lAtomicCompareAndSwapPointer(
+                (void **)&freeTaskGroups[i], tg, NULL);
             if (ptr == NULL)
                 return;
         }
@@ -811,26 +786,24 @@ FreeTaskGroup(TaskGroup *tg) {
 ///////////////////////////////////////////////////////////////////////////
 
 // ispc expects these functions to have C linkage / not be mangled
-extern "C" { 
-    void ISPCLaunch(void **handlePtr, void *f, void *data, int count);
-    void *ISPCAlloc(void **handlePtr, int64_t size, int32_t alignment);
-    void ISPCSync(void *handle);
+extern "C" {
+void ISPCLaunch(void **handlePtr, void *f, void *data, int count);
+void *ISPCAlloc(void **handlePtr, int64_t size, int32_t alignment);
+void ISPCSync(void *handle);
 }
 
-void
-ISPCLaunch(void **taskGroupPtr, void *func, void *data, int count) {
+void ISPCLaunch(void **taskGroupPtr, void *func, void *data, int count) {
     TaskGroup *taskGroup;
     if (*taskGroupPtr == NULL) {
         InitTaskSystem();
         taskGroup = AllocTaskGroup();
         *taskGroupPtr = taskGroup;
-    }
-    else
+    } else
         taskGroup = (TaskGroup *)(*taskGroupPtr);
 
     int baseIndex = taskGroup->AllocTaskInfo(count);
     for (int i = 0; i < count; ++i) {
-        TaskInfo *ti = taskGroup->GetTaskInfo(baseIndex+i);
+        TaskInfo *ti = taskGroup->GetTaskInfo(baseIndex + i);
         ti->func = (TaskFuncType)func;
         ti->data = data;
         ti->taskIndex = i;
@@ -839,9 +812,7 @@ ISPCLaunch(void **taskGroupPtr, void *func, void *data, int count) {
     taskGroup->Launch(baseIndex, count);
 }
 
-
-void
-ISPCSync(void *h) {
+void ISPCSync(void *h) {
     TaskGroup *taskGroup = (TaskGroup *)h;
     if (taskGroup != NULL) {
         taskGroup->Sync();
@@ -849,16 +820,13 @@ ISPCSync(void *h) {
     }
 }
 
-
-void *
-ISPCAlloc(void **taskGroupPtr, int64_t size, int32_t alignment) {
+void *ISPCAlloc(void **taskGroupPtr, int64_t size, int32_t alignment) {
     TaskGroup *taskGroup;
     if (*taskGroupPtr == NULL) {
         InitTaskSystem();
         taskGroup = AllocTaskGroup();
         *taskGroupPtr = taskGroup;
-    }
-    else
+    } else
         taskGroup = (TaskGroup *)(*taskGroupPtr);
 
     return taskGroup->AllocMemory(size, alignment);

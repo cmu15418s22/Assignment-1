@@ -50,8 +50,7 @@ int mandel_ref(float c_re, float c_im, int count) {
     float z_re = c_re, z_im = c_im;
     int i;
 
-    for (i = 0; i < count; ++i) {
-
+    for (i = 0; i < count; i++) {
         if (z_re * z_re + z_im * z_im > 4.f)
             break;
 
@@ -64,67 +63,57 @@ int mandel_ref(float c_re, float c_im, int count) {
     return i;
 }
 
-// The following macro provides a template for generating parallel
-// implementations of the mandelbrot function, able to process a
-// (small) array of numbers.  When instantiated with an unrolling
-// factor, GCC will unroll the loops involving the index k, yielding
-// code that exploits ILP.
-#define MANDEL_BODY(ufactor)                                                   \
-    {                                                                          \
-        const int unroll = ufactor;                                            \
-        float z_re[unroll], z_im[unroll];                                      \
-        float new_re[unroll], new_im[unroll];                                  \
-        bool done[unroll];                                                     \
-        int icount[unroll];                                                    \
-        for (int k = 0; k < unroll; k++) {                                     \
-            z_re[k] = c_re[k];                                                 \
-            z_im[k] = c_im[k];                                                 \
-            done[k] = false;                                                   \
-            icount[k] = 0;                                                     \
-        }                                                                      \
-        int i;                                                                 \
-        for (i = 0; i < count; ++i) {                                          \
-            bool allDone = true;                                               \
-            for (int k = 0; k < unroll; k++) {                                 \
-                icount[k] = done[k] ? icount[k] : i;                           \
-                done[k] =                                                      \
-                    done[k] | (z_re[k] * z_re[k] + z_im[k] * z_im[k] > 4.f);   \
-                allDone = allDone & done[k];                                   \
-            }                                                                  \
-            if (allDone)                                                       \
-                break;                                                         \
-            for (int k = 0; k < unroll; k++) {                                 \
-                new_re[k] = z_re[k] * z_re[k] - z_im[k] * z_im[k];             \
-                new_im[k] = 2.f * z_re[k] * z_im[k];                           \
-                z_re[k] = c_re[k] + new_re[k];                                 \
-                z_im[k] = c_im[k] + new_im[k];                                 \
-            }                                                                  \
-        }                                                                      \
-        for (int k = 0; k < unroll; k++) {                                     \
-            iters[k] = done[k] ? icount[k] : i;                                \
-        }                                                                      \
-    }
+// The following templated function generates parallel implementations
+// of the mandelbrot function, able to process a (small) array of
+// numbers. When instantiated with an unrolling factor, GCC will unroll
+// the loops involving the index k, yielding code that exploits ILP.
+template <int unroll>
+void mandel_par(float *c_re, float *c_im, int count, int *iters) {
+    float z_re[unroll], z_im[unroll];
+    float new_re[unroll], new_im[unroll];
+    bool done[unroll];
+    int icount[unroll];
 
-// Versions of the code with different levels of parallelism
-void mandel_par1(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(1)
-void mandel_par2(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(2)
-void mandel_par3(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(3)
-void mandel_par4(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(4)
-void mandel_par5(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(5)
-void mandel_par6(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(6)
-void mandel_par7(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(7)
-void mandel_par8(float *c_re, float *c_im, int count, int *iters) MANDEL_BODY(8)
+    for (int k = 0; k < unroll; k++) {
+        z_re[k] = c_re[k];
+        z_im[k] = c_im[k];
+        done[k] = false;
+        icount[k] = 0;
+    }
+    int i;
+    for (i = 0; i < count; i++) {
+        bool allDone = true;
+        for (int k = 0; k < unroll; k++) {
+            icount[k] = done[k] ? icount[k] : i;
+            done[k] = done[k] | (z_re[k] * z_re[k] + z_im[k] * z_im[k] > 4.f);
+            allDone = allDone & done[k];
+        }
+        if (allDone)
+            break;
+        for (int k = 0; k < unroll; k++) {
+            new_re[k] = z_re[k] * z_re[k] - z_im[k] * z_im[k];
+            new_im[k] = 2.f * z_re[k] * z_im[k];
+            z_re[k] = c_re[k] + new_re[k];
+            z_im[k] = c_im[k] + new_im[k];
+        }
+    }
+    for (int k = 0; k < unroll; k++) {
+        iters[k] = done[k] ? icount[k] : i;
+    }
+}
 
 // Information about the different benchmarks
-par_info par_funs[] = {{1, mandel_par1, "ILP parallelism x1"},
-                       {2, mandel_par2, "ILP parallelism x2"},
-                       {3, mandel_par3, "ILP parallelism x3"},
-                       {4, mandel_par4, "ILP parallelism x4"},
-                       {5, mandel_par5, "ILP parallelism x5"},
-                       {6, mandel_par6, "ILP parallelism x6"},
-                       {7, mandel_par7, "ILP parallelism x7"},
-                       {8, mandel_par8, "ILP parallelism x8"},
-                       {0, NULL, ""}};
+par_info par_funs[] = {
+    {1, mandel_par<1>, "ILP parallelism x1"},
+    {2, mandel_par<2>, "ILP parallelism x2"},
+    {3, mandel_par<3>, "ILP parallelism x3"},
+    {4, mandel_par<4>, "ILP parallelism x4"},
+    {5, mandel_par<5>, "ILP parallelism x5"},
+    {6, mandel_par<6>, "ILP parallelism x6"},
+    {7, mandel_par<7>, "ILP parallelism x7"},
+    {8, mandel_par<8>, "ILP parallelism x8"},
+    {0, NULL, ""}
+};
 
 //
 // MandelbrotSerial --

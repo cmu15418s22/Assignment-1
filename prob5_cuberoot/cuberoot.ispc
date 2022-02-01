@@ -10,8 +10,7 @@ export void cuberoot_ispc(uniform int N, uniform float initialGuess,
         float error = abs(guess * guess * guess * x - 1.f);
 
         while (error > kThreshold) {
-            guess =
-                (4.f * guess - x * guess * guess * guess * guess) * (1.f / 3.f);
+            guess = (4.f * guess - x * guess * guess * guess * guess) * (1.f / 3.f);
             error = abs(guess * guess * guess * x - 1.f);
         }
 
@@ -22,7 +21,6 @@ export void cuberoot_ispc(uniform int N, uniform float initialGuess,
 task void cuberoot_ispc_task(uniform int N, uniform int span,
                              uniform float initialGuess, uniform float values[],
                              uniform float output[]) {
-
     uniform int indexStart = taskIndex * span;
     uniform int indexEnd = min(N, indexStart + span);
 
@@ -33,8 +31,7 @@ task void cuberoot_ispc_task(uniform int N, uniform int span,
         float error = abs(guess * guess * guess * x - 1.f);
 
         while (error > kThreshold) {
-            guess =
-                (4.f * guess - x * guess * guess * guess * guess) * (1.f / 3.f);
+            guess = (4.f * guess - x * guess * guess * guess * guess) * (1.f / 3.f);
             error = abs(guess * guess * guess * x - 1.f);
         }
 
